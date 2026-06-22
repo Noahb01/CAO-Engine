@@ -28,81 +28,105 @@
     <section id="panel-inschaling" class="panel active">
       <div class="card">
         <h2>Kandidaat inschalen</h2>
-        <form id="form-inschaling" autocomplete="off">
-          <div class="grid">
-            <label>Kandidaat naam <span style="font-weight:400">(optioneel)</span>
-              <input name="kandidaat_naam" type="text"
-                placeholder="Gebruik geen echte namen in deze demo"
-                autocomplete="off" spellcheck="false">
-              <span class="field-help">Niet nodig voor de berekening.</span>
-            </label>
-            <div class="label-full inschaling-keuze-block">
-              <label for="functietitel-input">Functietitel</label>
-              <div class="typeahead-wrap">
-                <input type="text" id="functietitel-input" class="functietitel-input"
-                  placeholder="Zoek functietitel… bijv. Calculator, Werkvoorbereider"
-                  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
-                <ul id="functietitel-suggesties" class="typeahead-list hidden" role="listbox"></ul>
-              </div>
-              <input type="hidden" name="functie_omschrijving" id="functie-omschrijving-hidden">
-              <input type="hidden" name="functieladder_nummer" id="functieladder-hidden">
-              <input type="hidden" name="ladder_niveau" id="ladder-niveau-value">
-              <div id="niveau-bijstelling" class="niveau-bijstelling hidden">
-                <span class="field-label">
-                  Bevestig functieniveau
-                  <span class="badge badge-oordeel">Oordeel — voorstel</span>
-                </span>
-                <p id="niveau-ladder-info" class="field-help"></p>
-                <p id="niveau-buiten-matrix-hint" class="niveau-buiten-matrix hidden"></p>
-                <div id="ladder-niveau-btns" class="ladder-niveau-btns" role="radiogroup" aria-label="Functieniveau"></div>
-                <div id="ladder-karakteristiek" class="ladder-karakteristiek hidden"></div>
-              </div>
-              <p class="field-help" style="margin-top:0.5rem">
-                Kies een functietitel. Pas het niveau optioneel aan aan de hand van de CAO-karakteristieken.
-              </p>
+        <form id="form-inschaling" class="form-modern" autocomplete="off">
+          <section class="form-section">
+            <h3 class="form-section-title">Kandidaat &amp; opdracht</h3>
+            <div class="form-grid">
+              <label class="field span-4">Kandidaat naam <span class="optional">(optioneel)</span>
+                <input name="kandidaat_naam" type="text"
+                  placeholder="Gebruik geen echte namen in deze demo"
+                  autocomplete="off" spellcheck="false">
+                <span class="field-hint">Niet nodig voor de berekening.</span>
+              </label>
+              <label class="field span-4">Opdrachtgever
+                <input name="opdrachtgever" type="text" required
+                  autocomplete="off" spellcheck="false">
+              </label>
+              <label class="field span-4">Project <span class="optional">(optioneel)</span>
+                <input name="project_naam" type="text"
+                  autocomplete="off" spellcheck="false">
+              </label>
             </div>
-            <label>Opdrachtgever
-              <input name="opdrachtgever" type="text" required
-                autocomplete="off" spellcheck="false">
-            </label>
-            <label>Project <span style="font-weight:400">(optioneel)</span>
-              <input name="project_naam" type="text"
-                autocomplete="off" spellcheck="false">
-            </label>
-            <label>Jaren op dit niveau (doorgroei 104/110/116%)
-              <input name="jaren_op_niveau" type="number" min="0" step="0.5" value="0"
-                autocomplete="off" title="Voor doorgroeigarantie art. 4.9.2">
-            </label>
-            <div class="label-full salaris-block">
-              <span class="field-label">Salarisverwachting <span style="font-weight:400">(optioneel)</span></span>
-              <div class="factor-modes salaris-modes">
-                <label><input type="radio" name="salaris_eenheid" value="uur" checked> Per uur</label>
-                <label><input type="radio" name="salaris_eenheid" value="maand"> Per maand</label>
+          </section>
+
+          <section class="form-section">
+            <h3 class="form-section-title">Functie &amp; niveau</h3>
+            <div class="form-grid">
+              <div class="field span-12 inschaling-keuze-block">
+                <label for="functietitel-input" class="field-label-block">Functietitel</label>
+                <div class="typeahead-wrap">
+                  <input type="text" id="functietitel-input" class="functietitel-input"
+                    placeholder="Zoek functietitel… bijv. Calculator, Werkvoorbereider"
+                    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
+                  <ul id="functietitel-suggesties" class="typeahead-list hidden" role="listbox"></ul>
+                </div>
+                <input type="hidden" name="functie_omschrijving" id="functie-omschrijving-hidden">
+                <input type="hidden" name="functieladder_nummer" id="functieladder-hidden">
+                <input type="hidden" name="ladder_niveau" id="ladder-niveau-value">
+                <div id="niveau-bijstelling" class="niveau-bijstelling hidden">
+                  <span class="field-label">
+                    Bevestig functieniveau
+                    <span class="badge badge-oordeel">Oordeel — voorstel</span>
+                  </span>
+                  <p id="niveau-ladder-info" class="field-help"></p>
+                  <p id="niveau-buiten-matrix-hint" class="niveau-buiten-matrix hidden"></p>
+                  <div id="ladder-niveau-btns" class="ladder-niveau-btns" role="radiogroup" aria-label="Functieniveau"></div>
+                  <div id="ladder-karakteristiek" class="ladder-karakteristiek hidden"></div>
+                </div>
+                <p class="field-hint">Kies een functietitel. Pas het niveau optioneel aan aan de hand van de CAO-karakteristieken.</p>
               </div>
-              <input name="salarisverwachting_waarde" type="number" min="0" step="0.01"
-                placeholder="Bedrag" autocomplete="off" data-salaris-input>
-              <p class="factor-preview" data-salaris-preview></p>
             </div>
-            <label>Peildatum / start
-              <input name="peildatum" type="date" required autocomplete="off">
-            </label>
-            <label>Marge % <span style="font-weight:400">(op kostprijs)</span>
-              <input name="marge_pct" type="number" min="0" max="200" step="1" required value="15"
-                autocomplete="off">
-            </label>
-            <div class="label-full factor-block">
-              <span class="field-label">Omrekenfactor</span>
-              <div class="factor-modes">
-                <label><input type="radio" name="factor_modus" value="opbouw" checked> Opbouw premies</label>
-                <label><input type="radio" name="factor_modus" value="vast15"> Vaste 1,5×</label>
-                <label><input type="radio" name="factor_modus" value="handmatig"> Handmatig</label>
+          </section>
+
+          <section class="form-section">
+            <h3 class="form-section-title">Ervaring &amp; salaris</h3>
+            <div class="form-grid">
+              <label class="field span-4">Jaren op dit niveau
+                <span class="field-sublabel">doorgroei 104/110/116%</span>
+                <input name="jaren_op_niveau" type="number" min="0" step="0.5" value="0"
+                  autocomplete="off" title="Voor doorgroeigarantie art. 4.9.2">
+              </label>
+              <div class="field span-8 salaris-block">
+                <span class="field-label-block">Salarisverwachting <span class="optional">(optioneel)</span></span>
+                <div class="segmented salaris-modes">
+                  <label class="segmented-item"><input type="radio" name="salaris_eenheid" value="uur" checked> Per uur</label>
+                  <label class="segmented-item"><input type="radio" name="salaris_eenheid" value="maand"> Per maand</label>
+                </div>
+                <input name="salarisverwachting_waarde" type="number" min="0" step="0.01"
+                  placeholder="Bedrag" autocomplete="off" data-salaris-input>
+                <p class="factor-preview" data-salaris-preview></p>
               </div>
-              <input name="omrekenfactor_handmatig" type="number" min="1" max="3" step="0.01"
-                class="factor-handmatig hidden" placeholder="bijv. 1.75">
-              <p class="factor-preview" data-factor-preview></p>
             </div>
-            <p class="field-help">Kostprijs = bruto × omrekenfactor. Facturatie = kostprijs + marge%.</p>
-            <div class="label-full cao-opties">
+          </section>
+
+          <section class="form-section">
+            <h3 class="form-section-title">Tarief &amp; kostprijs</h3>
+            <div class="form-grid">
+              <label class="field span-4">Peildatum / start
+                <input name="peildatum" type="date" required autocomplete="off">
+              </label>
+              <label class="field span-4">Marge % <span class="optional">(op kostprijs)</span>
+                <input name="marge_pct" type="number" min="0" max="200" step="1" required value="15"
+                  autocomplete="off">
+              </label>
+              <div class="field span-12 factor-block">
+                <span class="field-label-block">Omrekenfactor</span>
+                <div class="segmented">
+                  <label class="segmented-item"><input type="radio" name="factor_modus" value="opbouw" checked> Opbouw premies</label>
+                  <label class="segmented-item"><input type="radio" name="factor_modus" value="vast15"> Vaste 1,5×</label>
+                  <label class="segmented-item"><input type="radio" name="factor_modus" value="handmatig"> Handmatig</label>
+                </div>
+                <input name="omrekenfactor_handmatig" type="number" min="1" max="3" step="0.01"
+                  class="factor-handmatig hidden input-narrow" placeholder="bijv. 1.75">
+                <p class="factor-preview" data-factor-preview></p>
+                <p class="field-hint">Kostprijs = bruto × omrekenfactor. Facturatie = kostprijs + marge%.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section form-section--compact">
+            <h3 class="form-section-title">CAO-opties</h3>
+            <div class="cao-opties">
               <label class="checkbox-row">
                 <input type="checkbox" name="nieuw_in_bouw_infra" id="nieuw-in-bouw">
                 Nieuw in bouw &amp; infra (starttabel art. 4.11, max. 1 jaar)
@@ -112,11 +136,11 @@
                 2e halfjaar starttabel (anders 1e halfjaar)
               </label>
             </div>
-          </div>
+          </section>
 
-          <details class="premies-details" style="margin-top:1rem">
-            <summary style="cursor:pointer;color:var(--primary);font-size:0.9rem">Werkgeverspremies (indicatief)</summary>
-            <div class="grid premies-grid" style="margin-top:0.75rem">
+          <details class="form-details premies-details">
+            <summary>Werkgeverspremies (indicatief)</summary>
+            <div class="form-grid premies-grid">
               <label>Vakantietoeslag %
                 <input name="vakantietoeslag_pct" type="number" min="0" step="0.1" value="8">
               </label>
@@ -138,10 +162,10 @@
             </div>
           </details>
 
-          <details class="handmatige-override-details" style="margin-top:1rem">
-            <summary style="cursor:pointer;color:var(--primary);font-size:0.9rem">Geavanceerd (optioneel)</summary>
-            <div class="grid" style="margin-top:0.75rem">
-              <label>Bevestigd uurloon €
+          <details class="form-details handmatige-override-details">
+            <summary>Geavanceerd (optioneel)</summary>
+            <div class="form-grid">
+              <label class="field span-4">Bevestigd uurloon €
                 <input name="bevestigd_uurloon" type="number" min="0" step="0.01" placeholder="bijv. 25.00">
               </label>
             </div>
@@ -198,53 +222,66 @@
     <section id="panel-tarief" class="panel">
       <div class="card">
         <h2>Integraal tarief berekenen</h2>
-        <form id="form-tarief" autocomplete="off">
-          <div class="grid">
-            <label>Functieniveau
-              <select name="functieniveau" required>
-                <option value="1">1 — Ondersteunend</option>
-                <option value="2">2 — Uitvoerend</option>
-                <option value="3">3 — Zelfstandig</option>
-                <option value="4" selected>4 — Specialist</option>
-                <option value="5">5 — Senior / leiding</option>
-                <option value="6">6 — Management</option>
-              </select>
-            </label>
-            <label>Startdatum contract
-              <input name="startdatum_contract" type="date" required value="2026-01-15">
-            </label>
-            <label>Basis uurloon € <span style="font-weight:400">(leeg = CAO-min)</span>
-              <input name="basis_uurloon" type="number" min="0" step="0.01" placeholder="CAO-minimum">
-            </label>
-            <label>Jaren op dit niveau
-              <input name="jaren_op_niveau" type="number" min="0" step="0.5" value="0">
-            </label>
-            <label class="checkbox-row label-full">
+        <form id="form-tarief" class="form-modern" autocomplete="off">
+          <section class="form-section">
+            <h3 class="form-section-title">Functie &amp; loon</h3>
+            <div class="form-grid">
+              <label class="field span-4">Functieniveau
+                <select name="functieniveau" required>
+                  <option value="1">1 — Ondersteunend</option>
+                  <option value="2">2 — Uitvoerend</option>
+                  <option value="3">3 — Zelfstandig</option>
+                  <option value="4" selected>4 — Specialist</option>
+                  <option value="5">5 — Senior / leiding</option>
+                  <option value="6">6 — Management</option>
+                </select>
+              </label>
+              <label class="field span-4">Startdatum contract
+                <input name="startdatum_contract" type="date" required value="2026-01-15">
+              </label>
+              <label class="field span-4">Basis uurloon € <span class="optional">(leeg = CAO-min)</span>
+                <input name="basis_uurloon" type="number" min="0" step="0.01" placeholder="CAO-minimum">
+              </label>
+              <label class="field span-4">Jaren op dit niveau
+                <input name="jaren_op_niveau" type="number" min="0" step="0.5" value="0">
+              </label>
+              <label class="field span-4">Marge % <span class="optional">(op kostprijs)</span>
+                <input name="marge_pct" type="number" min="0" max="200" step="1" required value="15">
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section form-section--compact">
+            <h3 class="form-section-title">CAO-opties</h3>
+            <label class="checkbox-row">
               <input type="checkbox" name="nieuw_in_bouw_infra" class="nieuw-in-bouw-tarief">
               Nieuw in bouw &amp; infra (starttabel)
             </label>
-            <label class="checkbox-row label-full starttabel-halfjaar-tarief hidden">
+            <label class="checkbox-row starttabel-halfjaar-tarief hidden">
               <input type="checkbox" name="starttabel_tweede_halfjaar">
               2e halfjaar starttabel
             </label>
-            <label>Marge % <span style="font-weight:400">(op kostprijs)</span>
-              <input name="marge_pct" type="number" min="0" max="200" step="1" required value="15">
-            </label>
-            <div class="label-full factor-block">
-              <span class="field-label">Omrekenfactor</span>
-              <div class="factor-modes">
-                <label><input type="radio" name="factor_modus" value="opbouw" checked> Opbouw premies</label>
-                <label><input type="radio" name="factor_modus" value="vast15"> Vaste 1,5×</label>
-                <label><input type="radio" name="factor_modus" value="handmatig"> Handmatig</label>
+          </section>
+
+          <section class="form-section">
+            <h3 class="form-section-title">Omrekenfactor</h3>
+            <div class="form-grid">
+              <div class="field span-12 factor-block">
+                <div class="segmented">
+                  <label class="segmented-item"><input type="radio" name="factor_modus" value="opbouw" checked> Opbouw premies</label>
+                  <label class="segmented-item"><input type="radio" name="factor_modus" value="vast15"> Vaste 1,5×</label>
+                  <label class="segmented-item"><input type="radio" name="factor_modus" value="handmatig"> Handmatig</label>
+                </div>
+                <input name="omrekenfactor_handmatig" type="number" min="1" max="3" step="0.01"
+                  class="factor-handmatig hidden input-narrow" placeholder="bijv. 1.75">
+                <p class="factor-preview" data-factor-preview></p>
               </div>
-              <input name="omrekenfactor_handmatig" type="number" min="1" max="3" step="0.01"
-                class="factor-handmatig hidden" placeholder="bijv. 1.75">
-              <p class="factor-preview" data-factor-preview></p>
             </div>
-          </div>
-          <details class="premies-details" style="margin-top:1rem">
-            <summary style="cursor:pointer;color:var(--primary);font-size:0.9rem">Werkgeverspremies (indicatief)</summary>
-            <div class="grid premies-grid" style="margin-top:0.75rem">
+          </section>
+
+          <details class="form-details premies-details">
+            <summary>Werkgeverspremies (indicatief)</summary>
+            <div class="form-grid premies-grid">
               <label>Vakantietoeslag %
                 <input name="vakantietoeslag_pct" type="number" min="0" step="0.1" value="8">
               </label>
@@ -285,22 +322,24 @@
     <section id="panel-cao" class="panel">
       <div class="card">
         <h2>CAO loonband opzoeken</h2>
-        <form id="form-cao" autocomplete="off">
-          <div class="grid">
-            <label>Functieniveau
-              <select name="functieniveau" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4" selected>4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-              </select>
-            </label>
-            <label>Peildatum
-              <input name="datum" type="date" required value="2026-01-01">
-            </label>
-          </div>
+        <form id="form-cao" class="form-modern" autocomplete="off">
+          <section class="form-section">
+            <div class="form-grid">
+              <label class="field span-4">Functieniveau
+                <select name="functieniveau" required>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4" selected>4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+              </label>
+              <label class="field span-4">Peildatum
+                <input name="datum" type="date" required value="2026-01-01">
+              </label>
+            </div>
+          </section>
           <div class="actions">
             <button type="submit" class="primary">Opzoeken</button>
           </div>
