@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contract Generator — CAO Bouw & Infra</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="demo-banner" role="status">
+    Demo-versie. Indicatieve berekening, geen bindend advies. Premies zijn voorbeeldwaarden
+    en moeten per werkgever worden bevestigd.
+  </div>
+
+  <header>
+    <h1>Infrastructure Compliance Engine</h1>
+    <p>CAO Bouw & Infra 2025-2027 — Inschaling, tariefberekening & contractoverzichten</p>
+  </header>
+
+  <nav>
+    <button class="active" data-tab="panel-inschaling">Inschaling &amp; tarief</button>
+    <button data-tab="panel-tarief">Snelle berekening</button>
+    <button data-tab="panel-cao">CAO opzoeken</button>
+  </nav>
+
+  <main>
+    <!-- Inschaling -->
+    <section id="panel-inschaling" class="panel active">
+      <div class="card">
+        <h2>Kandidaat inschalen</h2>
+        <form id="form-inschaling" autocomplete="off">
+          <div class="grid">
+            <label>Kandidaat naam <span style="font-weight:400">(optioneel)</span>
+              <input name="kandidaat_naam" type="text"
+                placeholder="Gebruik geen echte namen in deze demo"
+                autocomplete="off" spellcheck="false">
+              <span class="field-help">Niet nodig voor de berekening.</span>
+            </label>
+            <div class="label-full inschaling-keuze-block">
+              <label for="functietitel-input">Functietitel</label>
+              <div class="typeahead-wrap">
+                <input type="text" id="functietitel-input" class="functietitel-input"
+                  placeholder="Zoek functietitel… bijv. Calculator, Werkvoorbereider"
+                  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
+                <ul id="functietitel-suggesties" class="typeahead-list hidden" role="listbox"></ul>
+              </div>
+              <input type="hidden" name="functie_omschrijving" id="functie-omschrijving-hidden">
+              <input type="hidden" name="functieladder_nummer" id="functieladder-hidden">
+              <input type="hidden" name="ladder_niveau" id="ladder-niveau-value">
+              <div id="niveau-bijstelling" class="niveau-bijstelling hidden">
+                <span class="field-label">
+                  Bevestig functieniveau
+                  <span class="badge badge-oordeel">Oordeel — voorstel</span>
+                </span>
+                <p id="niveau-ladder-info" class="field-help"></p>
+                <p id="niveau-buiten-matrix-hint" class="niveau-buiten-matrix hidden"></p>
+                <div id="ladder-niveau-btns" class="ladder-niveau-btns" role="radiogroup" aria-label="Functieniveau"></div>
+                <div id="ladder-karakteristiek" class="ladder-karakteristiek hidden"></div>
+              </div>
+              <p class="field-help" style="margin-top:0.5rem">
+                Kies een functietitel. Pas het niveau optioneel aan aan de hand van de CAO-karakteristieken.
+              </p>
+            </div>
+            <label>Opdrachtgever
+              <input name="opdrachtgever" type="text" required
+                autocomplete="off" spellcheck="false">
+            </label>
+            <label>Project <span style="font-weight:400">(optioneel)</span>
+              <input name="project_naam" type="text"
+                autocomplete="off" spellcheck="false">
+            </label>
+            <label>Jaren op dit niveau (doorgroei 104/110/116%)
+              <input name="jaren_op_niveau" type="number" min="0" step="0.5" value="0"
+                autocomplete="off" title="Voor doorgroeigarantie art. 4.9.2">
+            </label>
+            <div class="label-full salaris-block">
+              <span class="field-label">Salarisverwachting <span style="font-weight:400">(optioneel)</span></span>
+              <div class="factor-modes salaris-modes">
+                <label><input type="radio" name="salaris_eenheid" value="uur" checked> Per uur</label>
+                <label><input type="radio" name="salaris_eenheid" value="maand"> Per maand</label>
+              </div>
+              <input name="salarisverwachting_waarde" type="number" min="0" step="0.01"
+                placeholder="Bedrag" autocomplete="off" data-salaris-input>
+              <p class="factor-preview" data-salaris-preview></p>
+            </div>
+            <label>Peildatum / start
+              <input name="peildatum" type="date" required autocomplete="off">
+            </label>
+            <label>Marge % <span style="font-weight:400">(op kostprijs)</span>
+              <input name="marge_pct" type="number" min="0" max="200" step="1" required value="15"
+                autocomplete="off">
+            </label>
+            <div class="label-full factor-block">
+              <span class="field-label">Omrekenfactor</span>
+              <div class="factor-modes">
+                <label><input type="radio" name="factor_modus" value="opbouw" checked> Opbouw premies</label>
+                <label><input type="radio" name="factor_modus" value="vast15"> Vaste 1,5×</label>
+                <label><input type="radio" name="factor_modus" value="handmatig"> Handmatig</label>
+              </div>
+              <input name="omrekenfactor_handmatig" type="number" min="1" max="3" step="0.01"
+                class="factor-handmatig hidden" placeholder="bijv. 1.75">
+              <p class="factor-preview" data-factor-preview></p>
+            </div>
+            <p class="field-help">Kostprijs = bruto × omrekenfactor. Facturatie = kostprijs + marge%.</p>
+            <div class="label-full cao-opties">
+              <label class="checkbox-row">
+                <input type="checkbox" name="nieuw_in_bouw_infra" id="nieuw-in-bouw">
+                Nieuw in bouw &amp; infra (starttabel art. 4.11, max. 1 jaar)
+              </label>
+              <label class="checkbox-row starttabel-halfjaar hidden" id="starttabel-halfjaar-wrap">
+                <input type="checkbox" name="starttabel_tweede_halfjaar">
+                2e halfjaar starttabel (anders 1e halfjaar)
+              </label>
+            </div>
+          </div>
+
+          <details class="premies-details" style="margin-top:1rem">
+            <summary style="cursor:pointer;color:var(--primary);font-size:0.9rem">Werkgeverspremies (indicatief)</summary>
+            <div class="grid premies-grid" style="margin-top:0.75rem">
+              <label>Vakantietoeslag %
+                <input name="vakantietoeslag_pct" type="number" min="0" step="0.1" value="8">
+              </label>
+              <label>Duurzame inzetbaarheid %
+                <input name="duurzame_inzetbaarheid_pct" type="number" min="0" step="0.1" value="2.3">
+              </label>
+              <label>Pensioen bpfBOUW %
+                <input name="pensioen_bpfbouw_pct" type="number" min="0" step="0.1" value="15.9">
+              </label>
+              <label>Sociale lasten %
+                <input name="sociale_lasten_pct" type="number" min="0" step="0.1" value="18">
+              </label>
+              <label>O&amp;O-fonds %
+                <input name="sociaal_fonds_scholing_pct" type="number" min="0" step="0.1" value="2.5">
+              </label>
+              <label>Verzuimreserve %
+                <input name="verzuim_risico_pct" type="number" min="0" step="0.1" value="4">
+              </label>
+            </div>
+          </details>
+
+          <details class="handmatige-override-details" style="margin-top:1rem">
+            <summary style="cursor:pointer;color:var(--primary);font-size:0.9rem">Geavanceerd (optioneel)</summary>
+            <div class="grid" style="margin-top:0.75rem">
+              <label>Bevestigd uurloon €
+                <input name="bevestigd_uurloon" type="number" min="0" step="0.01" placeholder="bijv. 25.00">
+              </label>
+            </div>
+          </details>
+
+          <div class="actions">
+            <button type="submit" class="primary">Bereken inschaling &amp; tarief</button>
+          </div>
+        </form>
+        <div id="inschaling-error" class="error"></div>
+      </div>
+
+      <div id="inschaling-results" class="results">
+        <div class="card">
+          <div class="section-label hard">Hard — uit de CAO</div>
+          <div id="ins-ladder" class="ladder-result hidden"></div>
+          <div id="ins-hard" class="box hard"></div>
+
+          <div class="section-label oordeel">Oordeel — voorstel, bevestiging nodig</div>
+          <div id="ins-matrix-signaal" class="matrix-signaal hidden"></div>
+          <details id="ins-waarom-niveau" class="waarom-niveau hidden">
+            <summary>Waarom dit niveau?</summary>
+            <div id="ins-toelichting" class="toelichting-body"></div>
+          </details>
+          <div id="ins-niveau-bijstelling" class="niveau-bijstelling-result hidden"></div>
+          <div id="ins-oordeel" class="box oordeel"></div>
+
+          <div class="section-label">Check salarisverwachting (leidend niveau)</div>
+          <div id="ins-check" class="box" style="background:var(--bg);border:1px solid var(--border)"></div>
+
+          <div class="section-label">Kostprijs &amp; facturatie (Model A)</div>
+          <div id="ins-tarief"></div>
+          <div id="ins-factor-opbouw" class="factor-opbouw hidden"></div>
+          <div id="ins-waarschuwingen" class="box oordeel hidden" style="margin-top:1rem"></div>
+        </div>
+
+        <div class="card">
+          <h2>Contractoverzichten</h2>
+          <div id="inschaling-subtabs" class="subtabs">
+            <button class="active" data-subtab="ins-sub-kandidaat">Kandidaat</button>
+            <button data-subtab="ins-sub-bureau">Bureau (intern)</button>
+          </div>
+          <div id="ins-sub-kandidaat" class="subpanel active">
+            <div id="ins-kandidaat-doc" class="pre-block"></div>
+          </div>
+          <div id="ins-sub-bureau" class="subpanel">
+            <div id="ins-bureau-doc" class="pre-block"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Snelle tariefberekening -->
+    <section id="panel-tarief" class="panel">
+      <div class="card">
+        <h2>Integraal tarief berekenen</h2>
+        <form id="form-tarief" autocomplete="off">
+          <div class="grid">
+            <label>Functieniveau
+              <select name="functieniveau" required>
+                <option value="1">1 — Ondersteunend</option>
+                <option value="2">2 — Uitvoerend</option>
+                <option value="3">3 — Zelfstandig</option>
+                <option value="4" selected>4 — Specialist</option>
+                <option value="5">5 — Senior / leiding</option>
+                <option value="6">6 — Management</option>
+              </select>
+            </label>
+            <label>Startdatum contract
+              <input name="startdatum_contract" type="date" required value="2026-01-15">
+            </label>
+            <label>Basis uurloon € <span style="font-weight:400">(leeg = CAO-min)</span>
+              <input name="basis_uurloon" type="number" min="0" step="0.01" placeholder="CAO-minimum">
+            </label>
+            <label>Jaren op dit niveau
+              <input name="jaren_op_niveau" type="number" min="0" step="0.5" value="0">
+            </label>
+            <label class="checkbox-row label-full">
+              <input type="checkbox" name="nieuw_in_bouw_infra" class="nieuw-in-bouw-tarief">
+              Nieuw in bouw &amp; infra (starttabel)
+            </label>
+            <label class="checkbox-row label-full starttabel-halfjaar-tarief hidden">
+              <input type="checkbox" name="starttabel_tweede_halfjaar">
+              2e halfjaar starttabel
+            </label>
+            <label>Marge % <span style="font-weight:400">(op kostprijs)</span>
+              <input name="marge_pct" type="number" min="0" max="200" step="1" required value="15">
+            </label>
+            <div class="label-full factor-block">
+              <span class="field-label">Omrekenfactor</span>
+              <div class="factor-modes">
+                <label><input type="radio" name="factor_modus" value="opbouw" checked> Opbouw premies</label>
+                <label><input type="radio" name="factor_modus" value="vast15"> Vaste 1,5×</label>
+                <label><input type="radio" name="factor_modus" value="handmatig"> Handmatig</label>
+              </div>
+              <input name="omrekenfactor_handmatig" type="number" min="1" max="3" step="0.01"
+                class="factor-handmatig hidden" placeholder="bijv. 1.75">
+              <p class="factor-preview" data-factor-preview></p>
+            </div>
+          </div>
+          <details class="premies-details" style="margin-top:1rem">
+            <summary style="cursor:pointer;color:var(--primary);font-size:0.9rem">Werkgeverspremies (indicatief)</summary>
+            <div class="grid premies-grid" style="margin-top:0.75rem">
+              <label>Vakantietoeslag %
+                <input name="vakantietoeslag_pct" type="number" min="0" step="0.1" value="8">
+              </label>
+              <label>Duurzame inzetbaarheid %
+                <input name="duurzame_inzetbaarheid_pct" type="number" min="0" step="0.1" value="2.3">
+              </label>
+              <label>Pensioen bpfBOUW %
+                <input name="pensioen_bpfbouw_pct" type="number" min="0" step="0.1" value="15.9">
+              </label>
+              <label>Sociale lasten %
+                <input name="sociale_lasten_pct" type="number" min="0" step="0.1" value="18">
+              </label>
+              <label>O&amp;O-fonds %
+                <input name="sociaal_fonds_scholing_pct" type="number" min="0" step="0.1" value="2.5">
+              </label>
+              <label>Verzuimreserve %
+                <input name="verzuim_risico_pct" type="number" min="0" step="0.1" value="4">
+              </label>
+            </div>
+          </details>
+          <div class="actions">
+            <button type="submit" class="primary">Bereken tarief</button>
+          </div>
+        </form>
+        <div id="tarief-error" class="error"></div>
+      </div>
+
+      <div id="tarief-results" class="results">
+        <div class="card">
+          <h2>Resultaat</h2>
+          <div id="tarief-stats"></div>
+          <div id="tarief-factor-opbouw" class="factor-opbouw hidden"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CAO opzoeken -->
+    <section id="panel-cao" class="panel">
+      <div class="card">
+        <h2>CAO loonband opzoeken</h2>
+        <form id="form-cao" autocomplete="off">
+          <div class="grid">
+            <label>Functieniveau
+              <select name="functieniveau" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4" selected>4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+              </select>
+            </label>
+            <label>Peildatum
+              <input name="datum" type="date" required value="2026-01-01">
+            </label>
+          </div>
+          <div class="actions">
+            <button type="submit" class="primary">Opzoeken</button>
+          </div>
+        </form>
+        <div id="cao-error" class="error"></div>
+      </div>
+
+      <div id="cao-results" class="results">
+        <div class="card">
+          <h2>CAO-info</h2>
+          <div id="cao-stats"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
