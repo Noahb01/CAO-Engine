@@ -30,6 +30,62 @@ def _format_datum(d: date) -> str:
     return d.strftime("%d-%m-%Y")
 
 
+def _niveau_label(niveau: int) -> str:
+    return FUNCTIENIVEAU_KENMERKEN[niveau]["naam"]
+
+
+def _is_pm_waarschuwing(tekst: str) -> bool:
+    return tekst.strip().startswith("CAO PM: zie ook")
+
+
+def _format_pm_toelichting(pm_verwijzingen: Optional[list]) -> Optional[str]:
+    if not pm_verwijzingen:
+        return None
+    namen = ", ".join(pm_verwijzingen)
+    return (
+        f"Verwante ladders voor deze functie: {namen} "
+        "(controleer of de functie-inhoud beter bij een van deze past)."
+    )
+
+
+def _inschaling_blok_regels(
+    *,
+    functie_titel: Optional[str],
+    ladder_nr: Optional[int],
+    ladder_naam: Optional[str],
+    niveau: int,
+    voorgesteld_niveau: Optional[int] = None,
+    niveau_bijgesteld: bool = False,
+    niveau_bijstelling: Optional[str] = None,
+    pm_verwijzingen: Optional[list] = None,
+) -> list[str]:
+    """Verantwoordingsregels: functie → ladder → niveau (HARD / navolgbaarheid)."""
+    titel = (functie_titel or "").strip() or "niet opgegeven"
+    lines = [
+        "--- Inschaling ---",
+        f"  Functietitel:            {titel}",
+    ]
+    if ladder_nr is not None and ladder_naam:
+        lines.append(f"  Functieladder:           ladder {ladder_nr} — {ladder_naam}")
+    elif ladder_nr is not None:
+        lines.append(f"  Functieladder:           ladder {ladder_nr}")
+    else:
+        lines.append("  Functieladder:           niet van toepassing (niveau direct gekozen)")
+    lines.append(f"  Niveau:                  {_niveau_label(niveau)}")
+    if niveau_bijgesteld and voorgesteld_niveau is not None:
+        if niveau_bijstelling:
+            lines.append(f"  {niveau_bijstelling}")
+        else:
+            lines.append(
+                f"  Niveau handmatig bijgesteld van {voorgesteld_niveau} naar {niveau}."
+            )
+    pm = _format_pm_toelichting(pm_verwijzingen)
+    if pm:
+        lines.append(f"  {pm}")
+    lines.append("")
+    return lines
+
+
 def _maandsalaris(uurloon: float) -> float:
     return round(uurloon * UREN_PER_MAAND, 2)
 
@@ -105,10 +161,12 @@ def genereer_kandidaat_overzicht(
     opdrachtgever: str,
     project_naam: Optional[str] = None,
     peildatum: Optional[date] = None,
+    functie_titel: Optional[str] = None,
 ) -> str:
     """Transparant salarisoverzicht voor de kandidaat (zonder kostprijs/marge)."""
     maand = _maandsalaris(berekening.bruto_uurloon)
     start = peildatum or berekening.cao_tabel
+    titel = (functie_titel or "").strip() or "niet opgegeven"
 
     lines = [
         "=" * 70,
@@ -124,7 +182,8 @@ def genereer_kandidaat_overzicht(
     lines.extend(
         [
             f"Startdatum:     {_format_datum(start)}",
-            f"Functieniveau:  {berekening.niveau_naam}",
+            f"Functietitel:   {titel}",
+            f"Functieniveau:  {_niveau_label(berekening.functieniveau)}",
             f"CAO-tabel:      {_format_datum(berekening.cao_tabel)}",
             "",
             "--- Bruto uurloon ---",
@@ -147,10 +206,23 @@ def genereer_bureau_overzicht(
     opdrachtgever: str,
     project_naam: Optional[str] = None,
     peildatum: Optional[date] = None,
+    functie_titel: Optional[str] = None,
+    functieladder: Optional[dict] = None,
+    voorgesteld_niveau: Optional[int] = None,
+    niveau_bijgesteld: bool = False,
+    niveau_bijstelling: Optional[str] = None,
 ) -> str:
     """Intern overzicht met Model A kostprijsopbouw."""
     start = peildatum or berekening.cao_tabel
     marge_bedrag = berekening.facturatie_per_uur - berekening.kostprijs_per_uur
+
+    ladder_nr = berekening.functieladder_nummer
+    ladder_naam = berekening.functieladder_naam
+    pm_verwijzingen = None
+    if functieladder:
+        ladder_nr = functieladder.get("nummer", ladder_nr)
+        ladder_naam = functieladder.get("naam", ladder_naam)
+        pm_verwijzingen = functieladder.get("pm_verwijzingen")
 
     lines = [
         "=" * 70,
@@ -163,11 +235,22 @@ def genereer_bureau_overzicht(
     lines.append(f"Opdrachtgever:  {opdrachtgever}")
     if project_naam:
         lines.append(f"Project:        {project_naam}")
+    lines.append(f"Startdatum:     {_format_datum(start)}")
+    lines.append("")
+    lines.extend(
+        _inschaling_blok_regels(
+            functie_titel=functie_titel,
+            ladder_nr=ladder_nr,
+            ladder_naam=ladder_naam,
+            niveau=berekening.functieniveau,
+            voorgesteld_niveau=voorgesteld_niveau,
+            niveau_bijgesteld=niveau_bijgesteld,
+            niveau_bijstelling=niveau_bijstelling,
+            pm_verwijzingen=pm_verwijzingen,
+        )
+    )
     lines.extend(
         [
-            f"Startdatum:     {_format_datum(start)}",
-            f"Functieniveau:  {berekening.niveau_naam}",
-            "",
             "--- Bruto (CAO) ---",
             f"  Bruto uurloon:           €{berekening.bruto_uurloon:.2f}",
             f"  CAO-band:                €{berekening.band_min:.2f} – €{berekening.band_max:.2f}",
@@ -198,9 +281,11 @@ def genereer_bureau_overzicht(
         ]
     )
     if berekening.waarschuwingen:
-        lines.extend(["", "--- Waarschuwingen ---"])
-        for w in berekening.waarschuwingen:
-            lines.append(f"  ! {w}")
+        overige = [w for w in berekening.waarschuwingen if not _is_pm_waarschuwing(w)]
+        if overige:
+            lines.extend(["", "--- Waarschuwingen ---"])
+            for w in overige:
+                lines.append(f"  ! {w}")
     lines.append("=" * 70)
     return "\n".join(lines)
 
@@ -319,9 +404,23 @@ def genereer_volledig_voorstel(
         "functieladder": functieladder,
         "berekening": berekening,
         "kandidaat_overzicht": genereer_kandidaat_overzicht(
-            berekening, kandidaat_naam, opdrachtgever, project_naam, kandidaat.peildatum
+            berekening,
+            kandidaat_naam,
+            opdrachtgever,
+            project_naam,
+            kandidaat.peildatum,
+            functie_titel=kandidaat.functie_omschrijving,
         ),
         "bureau_overzicht": genereer_bureau_overzicht(
-            berekening, kandidaat_naam, opdrachtgever, project_naam, kandidaat.peildatum
+            berekening,
+            kandidaat_naam,
+            opdrachtgever,
+            project_naam,
+            kandidaat.peildatum,
+            functie_titel=kandidaat.functie_omschrijving,
+            functieladder=functieladder,
+            voorgesteld_niveau=voorgesteld_niveau,
+            niveau_bijgesteld=niveau_bijgesteld,
+            niveau_bijstelling=niveau_bijstelling,
         ),
     }
